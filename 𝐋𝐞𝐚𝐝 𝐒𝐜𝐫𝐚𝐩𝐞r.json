@@ -18,7 +18,7 @@
         0,
         0
       ],
-      "id": "f06a043a-dc75-4fa0-8638-2339715eadff",
+      "id": "xxxx",  # insert your credentials
       "name": "Schedule Trigger"
     },
     {
@@ -41,7 +41,7 @@
         208,
         0
       ],
-      "id": "0e37b994-9258-419b-82b2-1cbae382d8a0",
+      "id": "xxxxxx", # insert your credentials
       "name": "Scrape URL List"
     },
     {
@@ -55,7 +55,7 @@
         624,
         0
       ],
-      "id": "24f07ffb-5fab-4f4a-8e2b-416e62342393",
+      "id": "xyz", # insert your credentials
       "name": "HTTP Request",
       "alwaysOutputData": true,
       "executeOnce": false,
@@ -71,7 +71,7 @@
         416,
         0
       ],
-      "id": "b6ae3526-d4c5-4d15-87ca-cc43deab3d7f",
+      "id": "xyz", # insert your credentials
       "name": "Parse Url List",
       "alwaysOutputData": true,
       "executeOnce": true,
@@ -87,7 +87,7 @@
         1040,
         0
       ],
-      "id": "dd97d1e2-6874-4153-967a-f5112e69f5e9",
+      "id": "xyz",  # insert your credentials
       "name": "Parse Leads"
     },
     {
@@ -100,7 +100,7 @@
         832,
         0
       ],
-      "id": "c3e3cdf5-37c0-47b0-b315-db67b73398f3",
+      "id": "xyz",  # insert your credentials
       "name": "Output Format",
       "alwaysOutputData": true,
       "executeOnce": false,
@@ -111,17 +111,17 @@
         "operation": "append",
         "documentId": {
           "__rl": true,
-          "value": "1rUjfIbJaWbN7yin5A7Jt9qKfJrgMOeXbW_cgLySb0Xg",
+          "value": "xyz",       # insert your credentials
           "mode": "list",
           "cachedResultName": "Lead Scraper Data",
-          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1rUjfIbJaWbN7yin5A7Jt9qKfJrgMOeXbW_cgLySb0Xg/edit?usp=drivesdk"
+          "cachedResultUrl": "xyz"  # insert your credentials
         },
         "sheetName": {
           "__rl": true,
           "value": "gid=0",
           "mode": "list",
           "cachedResultName": "Sheet1",
-          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1rUjfIbJaWbN7yin5A7Jt9qKfJrgMOeXbW_cgLySb0Xg/edit#gid=0"
+          "cachedResultUrl": "xyz"      # insert your credentials 
         },
         "columns": {
           "mappingMode": "defineBelow",
@@ -181,12 +181,12 @@
         1200,
         0
       ],
-      "id": "5bafda7a-5d0d-43bc-8100-24253d921044",
+      "id": "xyz",      # insert your credentials
       "name": "Append row in sheet",
       "alwaysOutputData": true,
       "credentials": {
         "googleSheetsOAuth2Api": {
-          "id": "SVAzqPyWIRZX3cPX",
+          "id": "xyz",                             # insert your credentials 
           "name": "Google Sheets account 2"
         }
       }
@@ -270,10 +270,10 @@
   "settings": {
     "executionOrder": "v1"
   },
-  "versionId": "638b29cf-7fd7-4e23-be70-e1912d1ad676",
+  "versionId": "xyz",              # insert your credentials 
   "meta": {
     "templateCredsSetupCompleted": true,
-    "instanceId": "f2f1dcd5c8f67661fe1282a95afcbf703f289ec1e0167ebae39ba3417ad975a8"
+    "instanceId": "xyz"       # insert your credentials
   },
   "id": "Hh9aZxbawtjfRQBW",
   "tags": []
