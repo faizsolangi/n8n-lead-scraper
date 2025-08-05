@@ -1,0 +1,280 @@
+{
+  "name": "𝐋𝐞𝐚𝐝 𝐒𝐜𝐫𝐚𝐩𝐞r",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "minutes",
+              "minutesInterval": 15
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        0,
+        0
+      ],
+      "id": "f06a043a-dc75-4fa0-8638-2339715eadff",
+      "name": "Schedule Trigger"
+    },
+    {
+      "parameters": {
+        "url": "https://books.toscrape.com/",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "User-Agent",
+              "value": " Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        208,
+        0
+      ],
+      "id": "0e37b994-9258-419b-82b2-1cbae382d8a0",
+      "name": "Scrape URL List"
+    },
+    {
+      "parameters": {
+        "url": "={{$json.url}}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        624,
+        0
+      ],
+      "id": "24f07ffb-5fab-4f4a-8e2b-416e62342393",
+      "name": "HTTP Request",
+      "alwaysOutputData": true,
+      "executeOnce": false,
+      "retryOnFail": false
+    },
+    {
+      "parameters": {
+        "jsCode": "// Log input for debugging\nconsole.log('Node 3 Input:', JSON.stringify(items, null, 2));\n\n// Check if input is valid\nif (!items || !items[0] || !items[0].json || typeof items[0].json.data !== 'string') {\n  console.log('Error: Invalid or missing HTML data from Scrape URL List node');\n  return [{\n    json: { \n      error: 'No valid HTML data found', \n      input: JSON.stringify(items)\n    }\n  }];\n}\n\nconst urls = [];\nconst seenUrls = new Set(); // Track unique URLs\nconst html = items[0].json.data;\n\n// Extract all catalogue URLs ending in index.html\nconst urlMatches = html.match(/href=[\"']catalogue\\/[^\"']+\\/index\\.html[\"']/g) || [];\nconsole.log('Raw URL Matches:', urlMatches);\n\n// Filter for product URLs (containing _[number])\nfor (const match of urlMatches) {\n  const url = match.replace(/href=[\"']/, '').replace(/[\"']/, '');\n  if (url.match(/catalogue\\/[^/]+_\\d+\\/index\\.html/) && !seenUrls.has(url)) {\n    seenUrls.add(url);\n    urls.push({ json: { url: `http://books.toscrape.com/${url}` } });\n  }\n}\n\n// Log filtered URLs\nconsole.log('Filtered Product URLs:', urls);\n\n// Limit to 5 URLs for testing\nreturn urls.slice(0, 5);"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        416,
+        0
+      ],
+      "id": "b6ae3526-d4c5-4d15-87ca-cc43deab3d7f",
+      "name": "Parse Url List",
+      "alwaysOutputData": true,
+      "executeOnce": true,
+      "retryOnFail": true
+    },
+    {
+      "parameters": {
+        "jsCode": "const leads = [];\nfor (const item of items) {\n  const html = item.json.body;\n  const nameMatch = html.match(/<title>(.*?)\\s*\\|\\s*Books to Scrape/i);\n  const categoryMatch = html.match(/<li class=\"active\">\\s*([^<]+)\\s*<\\/li>/i);\n  leads.push({\n    json: {\n      name: nameMatch ? nameMatch[1].trim() : 'Unknown',\n      url: item.json.url,\n      email: '',\n      industry: categoryMatch ? categoryMatch[1].trim() : 'Other'\n    }\n  });\n}\nreturn leads;"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1040,
+        0
+      ],
+      "id": "dd97d1e2-6874-4153-967a-f5112e69f5e9",
+      "name": "Parse Leads"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Debug: Log inputs for troubleshooting\nconsole.log('Node 4 input:', JSON.stringify($input.all(), null, 2));\nconsole.log('Node 3 input (Parse Url List):', JSON.stringify($('Parse Url List').all(), null, 2));\nconsole.log('Node 4 input length:', $input.all().length);\nconsole.log('Node 3 input length:', $('Parse Url List').all()?.length || 0);\n\n// Get inputs\nconst node4Input = $input.all();\nconst node3Input = $('Parse Url List').all() || [];\n\n// Handle empty input\nif (!node4Input || !Array.isArray(node4Input) || node4Input.length === 0) {\n  console.log('Error: No items from Node 4');\n  return [{ json: { error: 'No items from Node 4' } }];\n}\n\n// Map items to include json wrapper\nreturn node4Input.map((item, index) => {\n  const urlItem = node3Input[index] || {};\n  return {\n    json: {\n      body: item.body || item.data || item.json?.data || item.json?.body || 'No HTML',\n      url: item.url || urlItem.url || urlItem.json?.url || 'Unknown'\n    }\n  };\n});"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        832,
+        0
+      ],
+      "id": "c3e3cdf5-37c0-47b0-b315-db67b73398f3",
+      "name": "Output Format",
+      "alwaysOutputData": true,
+      "executeOnce": false,
+      "retryOnFail": true
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1rUjfIbJaWbN7yin5A7Jt9qKfJrgMOeXbW_cgLySb0Xg",
+          "mode": "list",
+          "cachedResultName": "Lead Scraper Data",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1rUjfIbJaWbN7yin5A7Jt9qKfJrgMOeXbW_cgLySb0Xg/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1rUjfIbJaWbN7yin5A7Jt9qKfJrgMOeXbW_cgLySb0Xg/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Name": "={{ $json.name }}",
+            "URL": "={{ $json.url }}",
+            "Email": "={{ $json.email }}",
+            "Industry": "={{ $json.industry }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "Name",
+              "displayName": "Name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "URL",
+              "displayName": "URL",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Email",
+              "displayName": "Email",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Industry",
+              "displayName": "Industry",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.6,
+      "position": [
+        1200,
+        0
+      ],
+      "id": "5bafda7a-5d0d-43bc-8100-24253d921044",
+      "name": "Append row in sheet",
+      "alwaysOutputData": true,
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "SVAzqPyWIRZX3cPX",
+          "name": "Google Sheets account 2"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "Scrape URL List",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Scrape URL List": {
+      "main": [
+        [
+          {
+            "node": "Parse Url List",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parse Url List": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request": {
+      "main": [
+        [
+          {
+            "node": "Output Format",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Output Format": {
+      "main": [
+        [
+          {
+            "node": "Parse Leads",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parse Leads": {
+      "main": [
+        [
+          {
+            "node": "Append row in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Append row in sheet": {
+      "main": [
+        []
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "638b29cf-7fd7-4e23-be70-e1912d1ad676",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "f2f1dcd5c8f67661fe1282a95afcbf703f289ec1e0167ebae39ba3417ad975a8"
+  },
+  "id": "Hh9aZxbawtjfRQBW",
+  "tags": []
+}
